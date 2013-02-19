@@ -78,8 +78,7 @@ namespace OMEconomy.OMBase
                 concat.Append((string)de.Key + (string)de.Value);
             }
 
-            OMBaseModule omBase = new OMBaseModule();
-            String regionSecret = omBase.GetRegionSecret(regionUUID);
+            String regionSecret = OMBaseModule.GetRegionSecret(regionUUID);
             String message = concat.ToString() + nonce + regionSecret;
 
             SHA1 hashFunction = new SHA1Managed();
@@ -91,40 +90,8 @@ namespace OMEconomy.OMBase
             }
 
             #if DEBUG
-                m_log.Debug(String.Format("[OMECONOMY] SHA1({0}) = {1}", message, hashHex));
+                //m_log.Debug(String.Format("[OMECONOMY] SHA1({0}) = {1}", message, hashHex));
             #endif
-            return hashHex;
-        }
-
-        public static String HashParameters(Hashtable parameters, string secret)
-        {
-            StringBuilder concat = new StringBuilder();
-
-            //Ensure that the parameters are in the correct order
-            SortedList<string, string> sortedParameters = new SortedList<string, string>();
-            foreach (DictionaryEntry parameter in parameters)
-            {
-                sortedParameters.Add((string)parameter.Key, (string)parameter.Value);
-            }
-
-            foreach (KeyValuePair<string, string> de in sortedParameters)
-            {
-                concat.Append((string)de.Key + (string)de.Value);
-            }
-            return HashString(concat.ToString(), secret);
-        }
-
-        public static String HashString(string message, string secret)
-        {
-            SHA1 hashFunction = new SHA1Managed();
-            byte[] hashValue = hashFunction.ComputeHash(Encoding.UTF8.GetBytes(message + secret));
-
-            string hashHex = "";
-            foreach (byte b in hashValue)
-            {
-                hashHex += String.Format("{0:x2}", b);
-            }
-
             return hashHex;
         }
 
@@ -179,7 +146,7 @@ namespace OMEconomy.OMBase
 
                 #region // Debug
 #if DEBUG
-                m_log.DebugFormat("[OMECONOMY] Response: {0}", str);
+                m_log.DebugFormat("[OMECONOMY] Response: {0}", str.Trim ());
 #endif
                 #endregion
 
@@ -221,32 +188,6 @@ namespace OMEconomy.OMBase
             m_log.Debug ("[OMBASE]:   -> " + status);
 
             return status == "OK";
-
-/***
-            OMBaseModule omBase = new OMBaseModule();
-
-            string hashValue = (string)(communicationData)["hashValue"];
-            UUID regionUUID = UUID.Parse((string)(communicationData)["regionUUID"]);
-            UInt32 nonce = UInt32.Parse((string)(communicationData)["nonce"]);
-            string notificationID = (string)(communicationData)["notificationID"];
-
-            Dictionary<string, string> d = new Dictionary<string, string>();
-            d.Add("method", "verifyNotification");
-            d.Add("notificationID", notificationID);
-            d.Add("regionUUID", regionUUID.ToString());
-            d.Add("hashValue", HashString(nonce++.ToString(), omBase.GetRegionSecret(regionUUID)));
-            Dictionary<string, string> response = DoRequest(gatewayURL, d);
-            string secret = (string)response["secret"];
-
-            if (hashValue == HashParameters(requestData, secret))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-***/
         }
 
         public static string GetGatewayURL(string initURL, string name, string moduleVersion, string gatewayEnvironment)

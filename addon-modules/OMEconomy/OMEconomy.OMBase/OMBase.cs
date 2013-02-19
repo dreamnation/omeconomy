@@ -53,7 +53,7 @@ namespace OMEconomy.OMBase
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private Dictionary<UUID, string> regionSecrets = new Dictionary<UUID, string>();
+        private static Dictionary<UUID, string> regionSecrets = new Dictionary<UUID, string>();
 
         private bool Enabled = false;
 
@@ -238,15 +238,16 @@ namespace OMEconomy.OMBase
             }
             else
             {
-                if (regionSecrets.ContainsKey(regionUUID))
-                {
-                    m_log.ErrorFormat("[{0}]: The secret for region {1}  is already set.", Name, regionUUID);
+                lock (regionSecrets) {
+                    if (regionSecrets.ContainsKey(regionUUID))
+                    {
+                        m_log.ErrorFormat("[{0}]: The secret for region {1}  is already set.", Name, regionUUID);
+                    }
+                    else
+                    {
+                        regionSecrets.Add(regionUUID, (string)response["regionSecret"]);
+                    }
                 }
-                else
-                {
-                    regionSecrets.Add(regionUUID, (string)response["regionSecret"]);
-                }
-
                 m_log.InfoFormat("[{0}]: The Service is Available.", Name);
             }
         }
@@ -305,9 +306,11 @@ namespace OMEconomy.OMBase
             m_log.Info("[OMECONOMY]: +---------------------------------------");
         }
 
-        public String GetRegionSecret(UUID regionUUID)
+        public static String GetRegionSecret(UUID regionUUID)
         {
-            return regionSecrets.ContainsKey(regionUUID) ? regionSecrets[regionUUID] : String.Empty;
+            lock (regionSecrets) {
+                return regionSecrets[regionUUID];
+            }
         }
 
         private void asynchronousClaimUser(String gatewayURL, Dictionary<string, string> data)
