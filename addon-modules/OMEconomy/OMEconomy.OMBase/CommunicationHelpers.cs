@@ -65,6 +65,37 @@ namespace OMEconomy.OMBase
                 scene.RegionInfo.ExternalEndPoint.Address.ToString(), scene.RegionInfo.HttpPort.ToString());
         }
 
+        public static String hashParameters(Hashtable parameters, string nonce, UUID regionUUID) {
+            StringBuilder concat = new StringBuilder();
+
+            //Ensure that the parameters are in the correct order
+            SortedList<string, string> sortedParameters = new SortedList<string, string>();
+            foreach(DictionaryEntry parameter in parameters) {
+                sortedParameters.Add((string)parameter.Key, (string)parameter.Value);
+            }
+
+            foreach( KeyValuePair<string, string> de in sortedParameters) {
+                concat.Append((string)de.Key + (string)de.Value);
+            }
+
+            OMBaseModule omBase = new OMBaseModule();
+            String regionSecret = omBase.GetRegionSecret(regionUUID);
+            String message = concat.ToString() + nonce + regionSecret;
+
+            SHA1 hashFunction = new SHA1Managed();
+            byte[] hashValue = hashFunction.ComputeHash(Encoding.UTF8.GetBytes(message));
+
+            string hashHex = "";
+            foreach(byte b in hashValue) {
+                hashHex += String.Format("{0:x2}", b);
+            }
+
+            #if DEBUG
+                m_log.Debug(String.Format("[OMECONOMY] SHA1({0}) = {1}", message, hashHex));
+            #endif
+            return hashHex;
+        }
+
         public static String HashParameters(Hashtable parameters, string secret)
         {
             StringBuilder concat = new StringBuilder();
@@ -165,7 +196,31 @@ namespace OMEconomy.OMBase
 
         public static bool ValidateRequest(Hashtable communicationData, Hashtable requestData, string gatewayURL)
         {
-            return true;
+            m_log.Debug ("[OMBASE]: ValidateRequest (cd, rd, " + gatewayURL + ")");
+            foreach (DictionaryEntry cd in communicationData) {
+                m_log.Debug ("[OMBASE]:   cd[" + cd.Key.ToString () + "]=" + cd.Value.ToString ());
+            }
+            foreach (DictionaryEntry rd in requestData) {
+                m_log.Debug ("[OMBASE]:   rd[" + rd.Key.ToString () + "]=" + rd.Value.ToString ());
+            }
+            Hashtable requestDataHashing = (Hashtable)requestData.Clone();
+            requestDataHashing.Remove("method");
+
+            UUID regionUUID  = UUID.Parse((string)(communicationData)["regionUUID"]);
+            String nonce  = (string)(communicationData)["nonce"];
+            string notificationID = (string)(communicationData)["notificationID"];
+
+            Dictionary<string, string> d = new Dictionary<string, string>();
+            d.Add("method", "verifyNotification");
+            d.Add("notificationID", notificationID);
+            d.Add("regionUUID", regionUUID.ToString());
+            d.Add("hashValue", hashParameters(requestDataHashing, nonce, regionUUID));
+            Dictionary<string, string> response = DoRequest (gatewayURL, d);
+
+            string status = response["status"];
+            m_log.Debug ("[OMBASE]:   -> " + status);
+
+            return status == "OK";
 
 /***
             OMBaseModule omBase = new OMBaseModule();
