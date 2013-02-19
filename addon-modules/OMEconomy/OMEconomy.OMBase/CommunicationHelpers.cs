@@ -123,7 +123,7 @@ namespace OMEconomy.OMBase
             try
             {
 #if INSOMNIA
-          ServicePointManager.ServerCertificateValidationCallback = delegate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+                ServicePointManager.ServerCertificateValidationCallback = delegate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
 #endif
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -165,6 +165,9 @@ namespace OMEconomy.OMBase
 
         public static bool ValidateRequest(Hashtable communicationData, Hashtable requestData, string gatewayURL)
         {
+            return true;
+
+/***
             OMBaseModule omBase = new OMBaseModule();
 
             string hashValue = (string)(communicationData)["hashValue"];
@@ -188,6 +191,7 @@ namespace OMEconomy.OMBase
             {
                 return false;
             }
+***/
         }
 
         public static string GetGatewayURL(string initURL, string name, string moduleVersion, string gatewayEnvironment)

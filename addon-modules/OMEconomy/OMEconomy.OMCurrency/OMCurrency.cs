@@ -61,7 +61,7 @@ namespace OMEconomy.OMCurrency
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private String MODULE_VERSION = "0.03.003";
+        private String MODULE_VERSION = "4.0.3";
 
         private bool Enabled = false;
         private String initURL = String.Empty;

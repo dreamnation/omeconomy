@@ -327,8 +327,6 @@ namespace OMEconomy.OMBase
                 Hashtable requestData = (Hashtable)request.Params[0];
                 Hashtable communicationData = (Hashtable)request.Params[1];
 
-                #region // Debug
-#if DEBUG
                 m_log.Debug("[OMBASE]: genericNotify(...)");
                 foreach (DictionaryEntry requestDatum in requestData)
                 {
@@ -338,8 +336,6 @@ namespace OMEconomy.OMBase
                 {
                     m_log.Debug("[OMBASE]:   " + communicationDatum.Key.ToString() + " " + (string)communicationDatum.Value);
                 }
-#endif
-                #endregion
 
                 String method = (string)requestData["method"];
                 requestData.Remove("method");
@@ -390,12 +386,11 @@ namespace OMEconomy.OMBase
                     throw new Exception("Could not fetch payload with ID " + payloadID);
                 }
 
-#if DEBUG
+                m_log.Debug ("[OMBASE] userInteract*:");
                 foreach (KeyValuePair<string, string> pair in messageItems)
                 {
-                    m_log.Error(pair.Key + "  " + pair.Value);
+                    m_log.Debug("[OMBASE]    " + pair.Key + "  " + pair.Value);
                 }
-#endif
 
                 IClientAPI client = SceneHandler.Instance.LocateClientObject(receiverUUID);
                 if (client == null)
