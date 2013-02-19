@@ -67,6 +67,7 @@ namespace OMEconomy.OMCurrency
         private String initURL = String.Empty;
         private String gatewayEnvironment = String.Empty;
         private String gridURL = String.Empty;
+        private String gridShortName = String.Empty;
 
         public Dictionary<UUID, int> m_KnownClientFunds = new Dictionary<UUID, int>();
         private String gatewayURL = String.Empty;
@@ -95,6 +96,7 @@ namespace OMEconomy.OMCurrency
                 gatewayEnvironment = conf.GetString("OMCurrencyEnvironment", "TEST");
                 initURL = conf.GetString("OMEconomyInitialize", String.Empty);
                 gridURL = config.Configs["GridService"].GetString("GridServerURI", String.Empty);
+                gridShortName = conf.GetString("GridShortName", String.Empty);
                 gridURL = CommunicationHelpers.NormaliseURL(gridURL);
             }
 
@@ -256,6 +258,7 @@ namespace OMEconomy.OMCurrency
                 parameters.Add("parentUUID", part.OwnerID.ToString());
                 parameters.Add("regionUUID", part.RegionID.ToString());
                 parameters.Add("gridURL", gridURL);
+                parameters.Add("gridShortName", gridShortName);
 
                 if ((answer & 0x2) == 2)
                 {
@@ -400,6 +403,7 @@ namespace OMEconomy.OMCurrency
                 d.Add("regionUUID", SceneHandler.Instance.LocateSceneClientIn(sourceId).RegionInfo.RegionID.ToString());
             }
             d.Add("gridURL", gridURL);
+            d.Add("gridShortName", gridShortName);
 
             if (additionalParameters != null)
             {

@@ -58,12 +58,13 @@ namespace OMEconomy.OMBase
         private bool Enabled = false;
 
         private string gridURL = String.Empty;
+        private string gridShortName = String.Empty;
         private string gridID = String.Empty;
         internal String gatewayURL = String.Empty;
         private String initURL = String.Empty;
         private String gatewayEnvironment = String.Empty;
 
-        private String MODULE_VERSION = "0.03.003";
+        private String MODULE_VERSION = "4.0.3";
 
         private delegate void delegateAsynchronousClaimUser(String gatewayURL, Dictionary<string, string> data);
 
@@ -91,6 +92,7 @@ namespace OMEconomy.OMBase
             {
                 gridID = config.Configs["OpenMetaverseEconomy"].GetString("GridID", String.Empty);
                 gridURL = config.Configs["GridService"].GetString("GridServerURI", String.Empty);
+                gridShortName = config.Configs["OpenMetaverseEconomy"].GetString("GridShortName", String.Empty);
 
                 gridURL = CommunicationHelpers.NormaliseURL(gridURL);
 
@@ -161,6 +163,7 @@ namespace OMEconomy.OMBase
                 Dictionary<string, string> d = new Dictionary<string, string>();
                 d.Add("method", "closeRegion");
                 d.Add("gridURL", gridURL);
+                d.Add("gridShortName", gridShortName);
                 d.Add("regions", JsonMapper.ToJson(regions));
                 CommunicationHelpers.DoRequest(gatewayURL, d);
             }
@@ -183,6 +186,7 @@ namespace OMEconomy.OMBase
             dd.Add("clientIP", "http://" + client.RemoteEndPoint.ToString() + "/");
             dd.Add("regionUUID", SceneHandler.Instance.LocateSceneClientIn(sp.UUID).RegionInfo.RegionID.ToString());
             dd.Add("gridURL", gridURL);
+            dd.Add("gridShortName", gridShortName);
             dd.Add("regionIP", CommunicationHelpers.GetRegionAdress(currentScene));
 
             delegateAsynchronousClaimUser a = new delegateAsynchronousClaimUser(asynchronousClaimUser);
@@ -223,6 +227,7 @@ namespace OMEconomy.OMBase
             d.Add("regionName", regionName);
             d.Add("regionUUID", regionUUID.ToString());
             d.Add("gridURL", gridURL);
+            d.Add("gridShortName", gridShortName);
             d.Add("simulatorVersion", VersionInfo.Version);
             d.Add("moduleVersion", MODULE_VERSION);
             Dictionary<string, string> response = CommunicationHelpers.DoRequest(gatewayURL, d);
