@@ -53,7 +53,7 @@ namespace OMEconomy.OMBase
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static Dictionary<UUID, string> regionSecrets = new Dictionary<UUID, string>();
+        private static Dictionary<UUID,OMBaseModule> regionInstances = new Dictionary<UUID,OMBaseModule>();
 
         private bool Enabled = false;
 
@@ -63,6 +63,10 @@ namespace OMEconomy.OMBase
         internal String gatewayURL = String.Empty;
         private String initURL = String.Empty;
         private String gatewayEnvironment = String.Empty;
+        private string regionAddress;
+        private string regionName;
+        private string regionSecret;
+        private UUID   regionUUID;
 
         private String MODULE_VERSION = "4.0.3";
 
@@ -128,8 +132,15 @@ namespace OMEconomy.OMBase
 
             SceneHandler.Instance.AddScene(scene);
 
-            InitializeRegion(
-                CommunicationHelpers.GetRegionAdress(scene), scene.RegionInfo.RegionName, scene.RegionInfo.originRegionID);
+            regionAddress = CommunicationHelpers.GetRegionAdress(scene);
+            regionName    = scene.RegionInfo.RegionName;
+            regionUUID    = scene.RegionInfo.originRegionID;
+
+            lock (regionInstances) {
+                regionInstances[regionUUID] = this;
+            }
+
+            InitializeRegion();
 
             scene.AddCommand(this, "OMBaseTest", "Test Open Metaverse Economy Connection", "Test Open Metaverse Economy Connection", testConnection);
             scene.AddCommand(this, "OMRegister", "Registers the Metaverse Economy Module", "Registers the Metaverse Economy Module", registerModule);
@@ -150,6 +161,10 @@ namespace OMEconomy.OMBase
             if (!Enabled)
                 return;
 
+            lock (regionInstances) {
+                regionInstances.Remove (regionUUID);
+            }
+
             scene.EventManager.OnMakeRootAgent -= OnMakeRootAgent;
             scene.EventManager.OnClientClosed -= OnClientClosed;
 
@@ -166,6 +181,7 @@ namespace OMEconomy.OMBase
                 d.Add("gridShortName", gridShortName);
                 d.Add("regions", JsonMapper.ToJson(regions));
                 CommunicationHelpers.DoRequest(gatewayURL, d);
+                regionSecret = null;
             }
         }
 
@@ -219,11 +235,21 @@ namespace OMEconomy.OMBase
             return item.ToString();
         }
 
-        internal void InitializeRegion(String regionAdress, String regionName, UUID regionUUID)
+        public static void InitializeRegion (UUID regionUUID)
         {
+            OMBaseModule zhis;
+            lock (regionInstances) {
+                zhis = regionInstances[regionUUID];
+            }
+            zhis.InitializeRegion();
+        }
+        private void InitializeRegion()
+        {
+            regionSecret = null;
+
             Dictionary<string, string> d = new Dictionary<string, string>();
             d.Add("method", "initializeRegion");
-            d.Add("regionIP", regionAdress);
+            d.Add("regionIP", regionAddress);
             d.Add("regionName", regionName);
             d.Add("regionUUID", regionUUID.ToString());
             d.Add("gridURL", gridURL);
@@ -232,23 +258,11 @@ namespace OMEconomy.OMBase
             d.Add("moduleVersion", MODULE_VERSION);
             Dictionary<string, string> response = CommunicationHelpers.DoRequest(gatewayURL, d);
 
-            if (response == null)
-            {
-                m_log.ErrorFormat("[OMECONOMY]: The Service is not Available", Name);
-            }
-            else
-            {
-                lock (regionSecrets) {
-                    if (regionSecrets.ContainsKey(regionUUID))
-                    {
-                        m_log.ErrorFormat("[OMECONOMY]: The secret for region {1}  is already set.", Name, regionUUID);
-                    }
-                    else
-                    {
-                        regionSecrets.Add(regionUUID, (string)response["regionSecret"]);
-                    }
-                }
-                m_log.InfoFormat("[OMECONOMY]: The Service is Available.", Name);
+            if (response == null) {
+                m_log.Error ("[OMECONOMY]: error reading region secret");
+            } else {
+                regionSecret = response["regionSecret"];
+                m_log.Info ("[OMECONOMY]: region initialized successfully");
             }
         }
 
@@ -306,25 +320,70 @@ namespace OMEconomy.OMBase
             m_log.Info("[OMECONOMY]: +---------------------------------------");
         }
 
-        public static String GetRegionSecret(UUID regionUUID)
+        public static String GetRegionSecret (UUID regionUUID)
         {
-            lock (regionSecrets) {
-                return regionSecrets[regionUUID];
+            OMBaseModule zhis;
+            lock (regionInstances) {
+                zhis = regionInstances[regionUUID];
             }
+            return zhis.regionSecret;
         }
 
+        /**
+         * @brief Runs in a worker thread to tell money server the avatar is present in this region.
+         *
+         *  <we send a claimUser message to server>
+         *      method=claimUser
+         *      avatarUUID=e8b4d660-8ef2-49e0-a202-3d1f8f06c2db
+         *      avatarName=Kunta Kinte
+         *      language=ENG
+         *      viewer=Imprudence 1.3.2.0
+         *      clientIP=http://173.166.90.236:58410/
+         *      regionUUID=c1d50d10-7117-1ff1-b0c4-0800200c9a66
+         *      gridURL=http://world.dreamnation.net:8003/
+         *      gridShortName=dreamnation
+         *      regionIP=http://69.25.198.248:9900/
+         *  <server sends us a genericNotify callback>
+         *      method notifyIsAlive
+         *      avatarUUID e8b4d660-8ef2-49e0-a202-3d1f8f06c2db
+         *      regionUUID c1d50d10-7117-1ff1-b0c4-0800200c9a66
+         *      notificationID 3714625
+         *      nonce 370619060
+         *  <we send a ValidatRequest message for the genericNotify>
+         *      method=verifyNotification
+         *      notificationID=3714601
+         *      regionUUID=c1d50d10-7117-1ff1-b0c4-0800200c9a66
+         *      hashValue=dbfe314d251daf47df4341f3942e4f4ad99c14af
+         *  <server replies to the ValidateRequest>
+         *      {'status' : 'OK'}
+         *  <server sends us a currencyNotify callback>
+         *      method notifyBalanceUpdate
+         *      avatarUUID e8b4d660-8ef2-49e0-a202-3d1f8f06c2db
+         *      balance 3677
+         *      regionUUID c1d50d10-7117-1ff1-b0c4-0800200c9a66
+         *      notificationID 3714603
+         *      nonce 3861607714
+         *  <we send a ValidatRequest message for the currencyNotify>
+         *      method=verifyNotification
+         *      notificationID=3714603
+         *      regionUUID=c1d50d10-7117-1ff1-b0c4-0800200c9a66
+         *      hashValue=fa1bd60a548649f0a238231f515b01cb14992711
+         *  <server replies to the ValidateRequest>
+         *      {'status' : 'OK'}
+         *  <server replies to the claimUser message>
+         *      {"success":"true"}
+         *
+         *  Notes:
+         *      1) the server occasionally replies 'NOK' to our ValidateRequest messages.
+         *      2) even when it returns 'NOK' to the ValidateRequest messages, the dumbbell
+         *         server replies {"success":"true"} to the original claimUser message.
+         */
         private void asynchronousClaimUser(String gatewayURL, Dictionary<string, string> data)
         {
-            if (CommunicationHelpers.DoRequest(gatewayURL, data) == null)
-            {
-                ServiceNotAvailable(new UUID(data["avatarUUID"]));
+            if (CommunicationHelpers.DoRequest(gatewayURL, data) == null) {
+                String message = "The currency service is not available. Please try again later.";
+                SceneHandler.Instance.LocateClientObject(new UUID(data["avatarUUID"])).SendBlueBoxMessage(UUID.Zero, String.Empty, message);
             }
-        }
-
-        private void ServiceNotAvailable(UUID agentID)
-        {
-            String message = "The currency service is not available. Please try again later.";
-            SceneHandler.Instance.LocateClientObject(agentID).SendBlueBoxMessage(UUID.Zero, String.Empty, message);
         }
 
         public XmlRpcResponse GenericNotify(XmlRpcRequest request, IPEndPoint ep)
