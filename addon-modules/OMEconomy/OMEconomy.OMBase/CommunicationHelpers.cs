@@ -175,9 +175,9 @@ namespace OMEconomy.OMBase
             Hashtable requestDataHashing = (Hashtable)requestData.Clone();
             requestDataHashing.Remove("method");
 
-            UUID regionUUID  = UUID.Parse((string)(communicationData)["regionUUID"]);
-            String nonce  = (string)(communicationData)["nonce"];
-            string notificationID = (string)(communicationData)["notificationID"];
+            UUID regionUUID  = UUID.Parse((string)communicationData["regionUUID"]);
+            String nonce  = (string)communicationData["nonce"];
+            string notificationID = (string)communicationData["notificationID"];
 
             Dictionary<string, string> d = new Dictionary<string, string>();
             d.Add("method", "verifyNotification");
@@ -189,7 +189,16 @@ namespace OMEconomy.OMBase
             string status = response["status"];
             m_log.Debug ("[OMECONOMY]:   -> " + status);
 
-            return status == "OK";
+            if (status == "OK") return true;
+
+            // Sometimes the server just goes braindead on us and somehow loses the key
+            // and keeps failing subsequent validate requests.
+            // So we fetch a new one if the validate request fails.
+            // Unfortunately replaying this validate request with the new key also fails.
+            // But at least the next validate request seems to succeed.
+            m_log.Warn ("[OMECONOMY]: refetching secret");
+            OMBaseModule.InitializeRegion (regionUUID);
+            return false;
         }
 
         public static string GetGatewayURL(string initURL, string name, string moduleVersion, string gatewayEnvironment)
