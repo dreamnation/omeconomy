@@ -146,7 +146,9 @@ namespace OMEconomy.OMBase
 
                 #region // Debug
 #if DEBUG
-                m_log.DebugFormat("[OMECONOMY] Response: {0}", str.Trim ());
+                string meth = "";
+                if ((postParameters != null) && !postParameters.TryGetValue ("method", out meth)) meth = "";
+                m_log.DebugFormat("[OMECONOMY] Response {0}: {1}", meth, str.Trim ());
 #endif
                 #endregion
 
