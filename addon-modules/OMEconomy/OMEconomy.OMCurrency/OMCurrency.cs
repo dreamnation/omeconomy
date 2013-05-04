@@ -108,7 +108,7 @@ namespace OMEconomy.OMCurrency
             MainServer.Instance.AddXmlRPCHandler("preflightBuyLandPrep", preBuyLand);
             MainServer.Instance.AddXmlRPCHandler("buyLandPrep", buyLand);
 
-            m_log.InfoFormat("[0]: Module is enabled.", Name);
+            m_log.InfoFormat("[OMECONOMY]: Module is enabled.", Name);
         }
 
         public void PostInitialise()
@@ -192,7 +192,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: ObjectGiveMoney Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: ObjectGiveMoney Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 return true;
             }
         }
@@ -279,7 +279,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: ScriptChangedEvent Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: ScriptChangedEvent Exception: {1} - {2}", Name, e.Message, e.StackTrace);
             }
         }
 
@@ -288,7 +288,7 @@ namespace OMEconomy.OMCurrency
             IClientAPI sender = SceneHandler.Instance.LocateClientObject(sourceID);
             if (sender == null)
             {
-                m_log.ErrorFormat("[{0}]: MoneyTransferRequest(): Could not find Avatar {1}:({2})",
+                m_log.ErrorFormat("[OMECONOMY]: MoneyTransferRequest(): Could not find Avatar {1}:({2})",
                     Name, sourceID.ToString(), sender.Name);
 
                 return;
@@ -323,7 +323,7 @@ namespace OMEconomy.OMCurrency
                     break;
 
                 default:
-                    m_log.ErrorFormat("[{0}]: TransactionType {1}  not specified.", Name, transactionType);
+                    m_log.ErrorFormat("[OMECONOMY]: TransactionType {1}  not specified.", Name, transactionType);
                     break;
             }
         }
@@ -505,14 +505,14 @@ namespace OMEconomy.OMCurrency
 
                 #region // Debug
 #if DEBUG
-                m_log.Debug("[OMCURRENCY]: currencyNotify(...)");
+                m_log.Debug("[OMECONOMY]: currencyNotify(...)");
                 foreach (DictionaryEntry requestDatum in requestData)
                 {
-                    m_log.Debug("[OMCURRENCY]:   " + requestDatum.Key.ToString() + " " + (string)requestDatum.Value);
+                    m_log.Debug("[OMECONOMY]:   " + requestDatum.Key.ToString() + " " + (string)requestDatum.Value);
                 }
                 foreach (DictionaryEntry communicationDatum in communicationData)
                 {
-                    m_log.Debug("[OMCURRENCY]:   " + communicationDatum.Key.ToString() + " " + (string)communicationDatum.Value);
+                    m_log.Debug("[OMECONOMY]:   " + communicationDatum.Key.ToString() + " " + (string)communicationDatum.Value);
                 }
 #endif
                 #endregion
@@ -535,7 +535,7 @@ namespace OMEconomy.OMCurrency
                             break;
                         case "notifyGetVersion": r.Value = GetVersion(requestData);
                             break;
-                        default: m_log.ErrorFormat("[{0}]: Method {1} is not supported", Name, method);
+                        default: m_log.ErrorFormat("[OMECONOMY]: Method {1} is not supported", Name, method);
                             break;
                     }
                 }
@@ -546,7 +546,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: genericNotify() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: genericNotify() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 r.SetFault(1, "Could not parse the requested method");
             }
             return r;
@@ -599,7 +599,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: changePrimPermissions() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: changePrimPermissions() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 rparms["success"] = false;
             }
             return rparms;
@@ -625,7 +625,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: balanceUpdate() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: balanceUpdate() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 rparms["success"] = false;
             }
             return rparms;
@@ -683,7 +683,7 @@ namespace OMEconomy.OMCurrency
             catch (Exception e)
             {
                 rparms["success"] = false;
-                m_log.ErrorFormat("[{0}]: landBuy(...) Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: landBuy(...) Exception: {1} - {2}", Name, e.Message, e.StackTrace);
             }
 
             return rparms;
@@ -736,7 +736,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: deliverObject() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: deliverObject() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 rparms["success"] = false;
             }
             return rparms;
@@ -775,7 +775,7 @@ namespace OMEconomy.OMCurrency
             }
             catch (Exception e)
             {
-                m_log.Error("[OMCURRENCY]: onObjectPaid() " + e.Message);
+                m_log.Error("[OMECONOMY]: onObjectPaid() " + e.Message);
                 rparms["success"] = false;
             }
             return rparms;
@@ -866,7 +866,7 @@ namespace OMEconomy.OMCurrency
 
         public XmlRpcResponse preBuyLand(XmlRpcRequest request, IPEndPoint ep)
         {
-            m_log.Error("preBuyLand(XmlRpcRequest request, IPEndPoint ep)");
+            m_log.Error("[OMECONOMY]: preBuyLand(XmlRpcRequest request, IPEndPoint ep)");
             XmlRpcResponse ret = new XmlRpcResponse();
             Hashtable retparam = new Hashtable();
             Hashtable membershiplevels = new Hashtable();
@@ -900,7 +900,7 @@ namespace OMEconomy.OMCurrency
 
         public XmlRpcResponse buyLand(XmlRpcRequest request, IPEndPoint ep)
         {
-            m_log.Error("buyLand(XmlRpcRequest request, IPEndPoint ep)");
+            m_log.Error("[OMECONOMY]: buyLand(XmlRpcRequest request, IPEndPoint ep)");
             XmlRpcResponse ret = new XmlRpcResponse();
             Hashtable retparam = new Hashtable();
             retparam.Add("success", true);

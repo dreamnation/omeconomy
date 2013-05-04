@@ -209,13 +209,13 @@ namespace OMEconomy.OMBase
                 string @group = gm.GetGroupRecord(groupID).GroupName;
                 if (@group != null)
                 {
-                    m_log.DebugFormat("[OMBASE]: Resolved group {0} to {1}", groupID, @group);
+                    m_log.DebugFormat("[OMECONOMY]: Resolved group {0} to {1}", groupID, @group);
                     return @group;
                 }
             }
             catch (Exception)
             {
-                m_log.ErrorFormat("[OMBASE]: Could not resolve group {0}", groupID);
+                m_log.ErrorFormat("[OMECONOMY]: Could not resolve group {0}", groupID);
             }
 
             return String.Empty;

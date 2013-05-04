@@ -105,7 +105,7 @@ namespace OMEconomy.OMBase
                 }
                 catch (Exception e)
                 {
-                    m_log.ErrorFormat("[0]: Exception {0}:[1}", Name, e.Message, e.StackTrace);
+                    m_log.ErrorFormat("[OMECONOMY]: Exception {0}:[1}", Name, e.Message, e.StackTrace);
                 }
 
                 gatewayURL = CommunicationHelpers.GetGatewayURL(initURL, Name, MODULE_VERSION, gatewayEnvironment);
@@ -209,7 +209,7 @@ namespace OMEconomy.OMBase
             }
             catch (Exception e)
             {
-                m_log.DebugFormat("[OMBASE]: LeaveAvatar(): {0}", e.Message);
+                m_log.DebugFormat("[OMECONOMY]: LeaveAvatar(): {0}", e.Message);
             }
         }
         #endregion
@@ -234,21 +234,21 @@ namespace OMEconomy.OMBase
 
             if (response == null)
             {
-                m_log.ErrorFormat("[{0}]: The Service is not Available", Name);
+                m_log.ErrorFormat("[OMECONOMY]: The Service is not Available", Name);
             }
             else
             {
                 lock (regionSecrets) {
                     if (regionSecrets.ContainsKey(regionUUID))
                     {
-                        m_log.ErrorFormat("[{0}]: The secret for region {1}  is already set.", Name, regionUUID);
+                        m_log.ErrorFormat("[OMECONOMY]: The secret for region {1}  is already set.", Name, regionUUID);
                     }
                     else
                     {
                         regionSecrets.Add(regionUUID, (string)response["regionSecret"]);
                     }
                 }
-                m_log.InfoFormat("[{0}]: The Service is Available.", Name);
+                m_log.InfoFormat("[OMECONOMY]: The Service is Available.", Name);
             }
         }
 
@@ -278,7 +278,7 @@ namespace OMEconomy.OMBase
             }
             else
             {
-                m_log.Error("Could not active the grid. Please check the parameters and try again");
+                m_log.Error("[OMECONOMY]: Could not active the grid. Please check the parameters and try again");
             }
         }
 
@@ -297,7 +297,7 @@ namespace OMEconomy.OMBase
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[OMBase] - Exception: {0}", e.Message);
+                m_log.ErrorFormat("[OMECONOMY] - Exception: {0}", e.Message);
             }
 
             m_log.Info("[OMECONOMY]: +---------------------------------------");
@@ -335,14 +335,14 @@ namespace OMEconomy.OMBase
                 Hashtable requestData = (Hashtable)request.Params[0];
                 Hashtable communicationData = (Hashtable)request.Params[1];
 
-                m_log.Debug("[OMBASE]: genericNotify(...)");
+                m_log.Debug("[OMECONOMY]: genericNotify(...)");
                 foreach (DictionaryEntry requestDatum in requestData)
                 {
-                    m_log.Debug("[OMBASE]:   " + requestDatum.Key.ToString() + " " + (string)requestDatum.Value);
+                    m_log.Debug("[OMECONOMY]:   " + requestDatum.Key.ToString() + " " + (string)requestDatum.Value);
                 }
                 foreach (DictionaryEntry communicationDatum in communicationData)
                 {
-                    m_log.Debug("[OMBASE]:   " + communicationDatum.Key.ToString() + " " + (string)communicationDatum.Value);
+                    m_log.Debug("[OMECONOMY]:   " + communicationDatum.Key.ToString() + " " + (string)communicationDatum.Value);
                 }
 
                 String method = (string)requestData["method"];
@@ -358,7 +358,7 @@ namespace OMEconomy.OMBase
                             break;
                         case "notifyIsAlive": r.Value = IsAlive(requestData);
                             break;
-                        default: m_log.ErrorFormat("[{0}]: Method {1} is not supported.", Name, method);
+                        default: m_log.ErrorFormat("[OMECONOMY]: Method {1} is not supported.", Name, method);
                             break;
                     }
                 }
@@ -369,7 +369,7 @@ namespace OMEconomy.OMBase
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: genericNotify() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: genericNotify() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 r.SetFault(1, "Could not parse the requested method");
             }
             return r;
@@ -394,10 +394,10 @@ namespace OMEconomy.OMBase
                     throw new Exception("Could not fetch payload with ID " + payloadID);
                 }
 
-                m_log.Debug ("[OMBASE] userInteract*:");
+                m_log.Debug ("[OMECONOMY] userInteract*:");
                 foreach (KeyValuePair<string, string> pair in messageItems)
                 {
-                    m_log.Debug("[OMBASE]    " + pair.Key + "  " + pair.Value);
+                    m_log.Debug("[OMECONOMY]    " + pair.Key + "  " + pair.Value);
                 }
 
                 IClientAPI client = SceneHandler.Instance.LocateClientObject(receiverUUID);
@@ -508,7 +508,7 @@ namespace OMEconomy.OMBase
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[{0}]: userInteract() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: userInteract() Exception: {1} - {2}", Name, e.Message, e.StackTrace);
                 rparms["success"] = false;
             }
             return rparms;
@@ -519,7 +519,7 @@ namespace OMEconomy.OMBase
             Hashtable rparms = new Hashtable();
             try
             {
-                m_log.ErrorFormat("[{0}]: {1}", requestData["message"]);
+                m_log.ErrorFormat("[OMECONOMY]: {1}", requestData["message"]);
                 rparms["success"] = true;
             }
             catch (Exception)

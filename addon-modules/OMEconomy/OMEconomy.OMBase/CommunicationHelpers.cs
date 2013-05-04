@@ -156,19 +156,19 @@ namespace OMEconomy.OMBase
             }
             catch (Exception e)
             {
-                m_log.ErrorFormat("[OMBASE]: Could not parse response Exception: {0} - {1}", e.Message, e.StackTrace);
+                m_log.ErrorFormat("[OMECONOMY]: Could not parse response Exception: {0} - {1}", e.Message, e.StackTrace);
                 return null;
             }
         }
 
         public static bool ValidateRequest(Hashtable communicationData, Hashtable requestData, string gatewayURL)
         {
-            m_log.Debug ("[OMBASE]: ValidateRequest (cd, rd, " + gatewayURL + ")");
+            m_log.Debug ("[OMECONOMY]: ValidateRequest (cd, rd, " + gatewayURL + ")");
             foreach (DictionaryEntry cd in communicationData) {
-                m_log.Debug ("[OMBASE]:   cd[" + cd.Key.ToString () + "]=" + cd.Value.ToString ());
+                m_log.Debug ("[OMECONOMY]:   cd[" + cd.Key.ToString () + "]=" + cd.Value.ToString ());
             }
             foreach (DictionaryEntry rd in requestData) {
-                m_log.Debug ("[OMBASE]:   rd[" + rd.Key.ToString () + "]=" + rd.Value.ToString ());
+                m_log.Debug ("[OMECONOMY]:   rd[" + rd.Key.ToString () + "]=" + rd.Value.ToString ());
             }
             Hashtable requestDataHashing = (Hashtable)requestData.Clone();
             requestDataHashing.Remove("method");
@@ -185,7 +185,7 @@ namespace OMEconomy.OMBase
             Dictionary<string, string> response = DoRequest (gatewayURL, d);
 
             string status = response["status"];
-            m_log.Debug ("[OMBASE]:   -> " + status);
+            m_log.Debug ("[OMECONOMY]:   -> " + status);
 
             return status == "OK";
         }
@@ -210,11 +210,11 @@ namespace OMEconomy.OMBase
 
             if (gatewayURL != null)
             {
-                m_log.InfoFormat("[{0}]: GatewayURL: {1}", name, gatewayURL);
+                m_log.InfoFormat("[OMECONOMY]: GatewayURL: {1}", name, gatewayURL);
             }
             else
             {
-                m_log.ErrorFormat("[{0}]: Could not set the GatewayURL - Please restart or contact the module vendor", name);
+                m_log.ErrorFormat("[OMECONOMY]: Could not set the GatewayURL - Please restart or contact the module vendor", name);
             }
             return gatewayURL;
         }
