@@ -1,0 +1,6 @@
+*~
+*.csproj
+*.csproj.user
+*.dll.build
+addon-modules/OMEconomy/OMEconomy.OMBase/bin/
+addon-modules/OMEconomy/OMEconomy.OMCurrency/bin/

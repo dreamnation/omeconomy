@@ -108,8 +108,6 @@ namespace OMEconomy.OMBase
         public static Dictionary<string, string> DoRequest(string url, Dictionary<string, string> postParameters)
         {
             string postData = postParameters == null ? "" : CommunicationHelpers.SerializeDictionary(postParameters);
-            ASCIIEncoding encoding = new ASCIIEncoding();
-            byte[] data = encoding.GetBytes(postData);
             String str = String.Empty;
 
             #region // Debug
@@ -124,25 +122,7 @@ namespace OMEconomy.OMBase
                 ServicePointManager.ServerCertificateValidationCallback = delegate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
 #endif
 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "POST";
-                request.Timeout = 20000;
-                request.ContentType = "application/x-www-form-urlencoded";
-                request.ContentLength = data.Length;
-                Stream requestStream = request.GetRequestStream();
-
-                requestStream.Write(data, 0, data.Length);
-                requestStream.Close();
-
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-
-                StreamReader reader = new StreamReader(responseStream, Encoding.Default);
-                str = reader.ReadToEnd();
-                reader.Close();
-                responseStream.Flush();
-                responseStream.Close();
-                response.Close();
+                str = SynchronousRestFormsRequester.MakeRequest ("POST", url, postData, 20000);
 
                 #region // Debug
 #if DEBUG
